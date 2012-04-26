@@ -1,0 +1,26 @@
+// vim: syntax=cpp:sw=2:smarttab
+
+#include <utility>
+
+namespace cxx {
+  template <class T1, class T2> struct Pair {
+    typedef T1 FirstType;
+    typedef T1 SecondType;
+    T1 first;
+    T2 second;
+    Pair(const Pair & x) { *this = x; }
+    Pair() : first(), second() {}
+    Pair(const std::pair<T1, T2> & x) : first(x.first), second(x.second) {}
+    template<class U, class V> Pair(const Pair<U, V>& x) : first(x.first), second(x.second) {}
+    template<class U, class V> Pair& operator=(Pair<U, V>& p) {
+      first = p.first;
+      second = p.second;
+      return *this;
+    }
+    void swap(Pair& p) {
+      std::swap(first, p.first);
+      std::swap(second, p.second);
+    }
+  };
+}
+

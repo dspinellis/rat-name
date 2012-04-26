@@ -1,0 +1,286 @@
+// vim: syntax=cpp:sw=2:smarttab
+
+#ifndef RAT_STRING_H
+#define RAT_STRING_H
+
+#include <functional>
+#include <memory>
+#include <string>
+#include <ostream>
+
+namespace cxx {
+  template <class C, class T = std::char_traits<C>, class A = std::allocator<T> >
+  class BasicString {
+  private:
+    typedef std::basic_string<C, T, A> S;
+    S s;
+  public:
+    // types
+    typedef typename S::traits_type		Traits;
+    typedef typename S::value_type		Value;
+    typedef typename S::allocator_type		Allocator;
+    typedef typename S::size_type		Size;
+    typedef typename S::difference_type		Difference;
+    typedef typename S::reference		Reference;
+    typedef typename S::const_reference		ConstReference;
+    typedef typename S::pointer			Pointer;
+    typedef typename S::const_pointer		ConstPointer;
+    typedef typename S::iterator		Iterator;
+    typedef typename S::const_iterator		ConstIterator;
+    typedef typename S::reverse_iterator	ReverseIterator;
+    typedef typename S::const_reverse_iterator	ConstReverseIterator;
+
+    static const Size NO_POSITION = S::npos;
+
+    // construct/copy/destroy
+    explicit BasicString(const Allocator& a = A()) :
+	    s(a) {}
+    BasicString(const BasicString& x) : s(x.s) {}
+    BasicString(const BasicString& str, Size pos, Size n = NO_POSITION, const Allocator& a = A()) :
+	    s(str.s, pos, n, a) {}
+    BasicString(const C *s, Size pos, Size n, const Allocator& a = A()) :
+	    s(s, n, a) {}
+    BasicString(const C *s, const Allocator& a = A()) :
+	    s(s, a) {}
+    BasicString(Size n, C c, const Allocator& a = A()) :
+	    s(n, c, a) {}
+    template <class InputIterator>
+	    BasicString(InputIterator begin, InputIterator end,
+	    const Allocator& a = A()) :
+	    s(begin, end, a) {}
+    ~BasicString() {}
+    BasicString& operator=(const BasicString& x) { s = x.s; return *this; }
+    BasicString& operator=(const C *str) { s = str; return *this; }
+    BasicString& operator=(const C c) { s = c; return *this; }
+
+    // iterators
+    Iterator			begin() { return s.begin(); }
+    ConstIterator		begin() const { return s.begin(); }
+    Iterator			end() { return s.end(); }
+    ConstIterator		end() const { return s.end(); }
+    ReverseIterator		reverseBegin() { return s.rbegin(); }
+    ConstReverseIterator	reverseBegin() const { return s.rbegin(); }
+    ReverseIterator		reverseEnd() { return s.rend(); }
+    ConstReverseIterator	reverseEnd() const { return s.rend(); }
+
+    // capacity:
+    Size			size() const { return s.size(); }
+    Size			length() const { return s.length(); }
+    Size			maxSize() const { return s.max_size(); }
+    void			resize(Size sz, C c) { s.resize(sz, c); }
+    void			resize(Size sz) { s.resize(sz); }
+    Size			capacity() const { return s.capacity(); }
+    void			reserve(Size sz) { s.reserve(sz); }
+    void			clear() { s.clear(); }
+    bool			empty() const { return s.empty(); }
+
+    // element access:
+    ConstReference		operator[](Size n) const { return s[n]; }
+    Reference			operator[](Size n) { return s[n]; }
+    ConstReference		at(Size n) const { return s.at[n]; }
+    Reference			at(Size n) { return s.at[n]; }
+
+    // modifiers:
+    BasicString&		operator+=(const BasicString& str) { return s += str.s; }
+    BasicString&		operator+=(const C *str) { return s += str; }
+    BasicString&		operator+=(const C c) { return s += c; }
+    BasicString&		append(const BasicString& str) { return s.append(str.s); }
+    BasicString&		append(const BasicString& str, Size pos, Size n) {
+      return s.append(str.s, pos, n);
+    }
+    BasicString&		append(const C *str, Size n) { return s.append(str, n); }
+    BasicString&		append(const C *str) { return s.append(str); }
+    template <class InputIterator> BasicString&
+				append(InputIterator first, InputIterator last) {
+				  return s.append(first, last);
+				}
+    void			pushBack(const T& x) { s.push_back(x); }
+
+
+    BasicString&		assign(BasicString& str) { return s.assign(str.s); }
+    BasicString&		assign(BasicString& str, Size pos, Size n) { return s.assign(str.s, pos, n); }
+    BasicString&		assign(const C* str, Size n) { return s.assign(str, n); }
+    BasicString&		assign(const C* str) { return s.assign(str); }
+    BasicString&		assign(Size n, C c) { return s.assign(n, c); }
+    template <class InputIterator> BasicString&
+				assign(InputIterator first, InputIterator last) {
+      return s.assign(first, last);
+    }
+
+    BasicString&		insert(Size pos1, const BasicString & str) { return s.insert(pos1, str.s); }
+    BasicString&		insert(Size pos1, const BasicString & str, Size pos2, Size n) {
+      return s.insert(pos1, str.s, pos2, n);
+    }
+    BasicString&		insert(Size pos, const C* str, Size n) { return s.insert(pos, str, n); }
+    BasicString&		insert(Size pos, const C* str) { return s.insert(pos, str); }
+    BasicString&		insert(Size pos, Size n, C c) { return s.insert(pos, n, c); }
+    Iterator			insert(Iterator pos, C c) { return s.insert(pos, c); }
+    void			insert(Iterator pos, Size n, C c) { return s.insert(pos, n, c); }
+    template <class InputIterator> void
+				insert(Iterator pos, InputIterator first, InputIterator last) {
+				  s.insert(pos, first, last);
+				}
+
+    Iterator			erase(Size pos = 0, Size n = NO_POSITION) { s.erase(pos, n); }
+    Iterator			erase(Iterator position) { s.erase(position); }
+    Iterator			erase(ConstIterator first, ConstIterator last) {
+				  s.erase(first, last);
+				}
+
+    BasicString&		replace(Size pos1, Size n1, const BasicString & str) {
+      return s.replace(pos1, n1, str.s);
+    }
+    BasicString&		replace(Size pos1, Size n1, const BasicString & str, Size pos2, Size n2) {
+      return s.replace(pos1, n1, str.s, pos2, n2);
+    }
+    BasicString&		replace(Size pos1, Size n1, const C* str, Size n2) {
+      return s.replace(pos1, n1, str, n2);
+    }
+    BasicString&		replace(Size pos1, Size n1, Size pos2, Size n2, C c) {
+      return s.replace(pos1, n1, pos2, n2, c);
+    }
+
+    BasicString&		replace(Iterator i1, Iterator i2, const BasicString & str) {
+      return s.replace(i1, i2, str.s);
+    }
+    BasicString&		replace(Iterator i1, Iterator i2, const C* str, Size n) {
+      return s.replace(i1, i2, str, n);
+    }
+    BasicString&		replace(Iterator i1, Iterator i2, const C* str) {
+      return s.replace(i1, i2, str);
+    }
+    BasicString&		replace(Iterator i1, Iterator i2, Size n, C c) {
+      return s.replace(i1, i2, n, c);
+    }
+    template <class InputIterator> void
+				replace(Iterator i1, Iterator i2, InputIterator j1, InputIterator j2) {
+      s.replace(i1, i2, j1, j2);
+    }
+
+    Size			copy(C* str, Size n, Size pos = 0) const {
+      return copy(str, n, pos);
+    }
+
+    void			swap(BasicString &x) { s.swap(x.s); }
+
+    // string operations:
+    const C*			asCString() const { return s.c_str(); }
+    const C*			data() const { return s.c_str(); }
+    Allocator			getAllocator() const { return s.get_allocator(); }
+
+    Size			find(const BasicString& str, Size pos = 0) const {
+      return s.find(str.s, pos);
+    }
+    Size			find(const C* str, Size pos, Size n) const {
+      return s.find(str, pos, n);
+    }
+    Size			find(const C* str, Size pos = 0) const {
+      return s.find(str, pos);
+    }
+    Size			find(C c, Size pos = 0) const {
+      return s.find(c, pos);
+    }
+
+    Size			reverseFind(const BasicString& str, Size pos = 0) const {
+      return s.rfind(str.s, pos);
+    }
+    Size			reverseFind(const C* str, Size pos, Size n) const {
+      return s.rfind(str, pos, n);
+    }
+    Size			reverseFind(const C* str, Size pos = 0) const {
+      return s.rfind(str, pos);
+    }
+    Size			reverseFind(C c, Size pos = 0) const {
+      return s.rfind(c, pos);
+    }
+
+    Size			findFirstOf(const BasicString& str, Size pos = 0) const {
+      return s.find_first_of(str.s, pos);
+    }
+    Size			findFirstOf(const C* str, Size pos, Size n) const {
+      return s.find_first_of(str, pos, n);
+    }
+    Size			findFirstOf(const C* str, Size pos = 0) const {
+      return s.find_first_of(str, pos);
+    }
+    Size			findFirstOf(C c, Size pos = 0) const {
+      return s.find_first_of(c, pos);
+    }
+
+    Size			findLastOf(const BasicString& str, Size pos = 0) const {
+      return s.find_last_of(str.s, pos);
+    }
+    Size			findLastOf(const C* str, Size pos, Size n) const {
+      return s.find_last_of(str, pos, n);
+    }
+    Size			findLastOf(const C* str, Size pos = 0) const {
+      return s.find_last_of(str, pos);
+    }
+    Size			findLastOf(C c, Size pos = 0) const {
+      return s.find_last_of(c, pos);
+    }
+
+
+    Size			findFirstNotOf(const BasicString& str, Size pos = 0) const {
+      return s.find_first_not_of(str.s, pos);
+    }
+    Size			findFirstNotOf(const C* str, Size pos, Size n) const {
+      return s.find_first_not_of(str, pos, n);
+    }
+    Size			findFirstNotOf(const C* str, Size pos = 0) const {
+      return s.find_first_not_of(str, pos);
+    }
+    Size			findFirstNotOf(C c, Size pos = 0) const {
+      return s.find_first_not_of(c, pos);
+    }
+
+    Size			findLastNotOf(const BasicString& str, Size pos = 0) const {
+      return s.find_last_not_of(str.s, pos);
+    }
+    Size			findLastNotOf(const C* str, Size pos, Size n) const {
+      return s.find_last_not_of(str, pos, n);
+    }
+    Size			findLastNotOf(const C* str, Size pos = 0) const {
+      return s.find_last_not_of(str, pos);
+    }
+    Size			findLastNotOf(C c, Size pos = 0) const {
+      return s.find_last_not_of(c, pos);
+    }
+
+    BasicString&		substring(Size pos = 0, Size n = NO_POSITION) {
+      return s.substring(pos, n);
+    }
+
+    int				compare(const BasicString &str) const {
+      return s.compare(str.s);
+    }
+    int				compare(Size pos1, Size n1, const BasicString &str) const {
+      return s.compare(pos1, n1, str.s);
+    }
+    int				compare(Size pos1, Size n1, const BasicString &str, Size pos2, Size n2) const {
+      return s.compare(pos1, n1, str.s, pos2, n2);
+    }
+
+    int				compare(const C* str) const {
+      return s.compare(str);
+    }
+    int				compare(Size pos1, Size n1, const C* str) const {
+      return s.compare(pos1, n1, str);
+    }
+    int				compare(Size pos1, Size n1, const C* str, Size n2) const {
+      return s.compare(pos1, n1, str, n2);
+    }
+
+    friend std::ostream& operator<<(std::ostream& o, const BasicString &s) {
+      o << s.s;
+      return o;
+    }
+
+  // TODO all &&
+  };
+
+
+  typedef BasicString<char> String;
+}
+
+#endif

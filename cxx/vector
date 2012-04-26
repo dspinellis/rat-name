@@ -1,0 +1,142 @@
+// vim: syntax=cpp:sw=2:smarttab
+
+#ifndef RAT_VECTOR_H
+#define RAT_VECTOR_H
+
+#include <vector>
+#include <functional>
+#include <memory>
+
+
+namespace cxx {
+  template <class T, class A = std::allocator<T> > class Vector {
+  private:
+    typedef std::vector<T, A> V;
+    V v;
+  public:
+    // types
+    typedef typename V::reference		Reference;
+    typedef typename V::const_reference		ConstReference;
+    typedef typename V::iterator		Iterator;
+    typedef typename V::const_iterator		ConstIterator;
+    typedef typename V::size_type		Size;
+    typedef typename V::difference_type		Difference;
+    typedef typename V::value_type		Value;
+    typedef typename V::allocator_type		Allocator;
+    typedef typename V::pointer			Pointer;
+    typedef typename V::const_pointer		ConstPointer;
+    typedef typename V::reverse_iterator	ReverseIterator;
+    typedef typename V::const_reverse_iterator	ConstReverseIterator;
+
+    // construct/copy/destroy
+    explicit Vector(const Allocator& a = A()) :
+	    v(a) {}
+    explicit Vector(Size n, const T& value = T(), const Allocator& a = A()) :
+	    v(n, value, a) {}
+    template <class InputIterator>
+	    Vector(InputIterator first, InputIterator last,
+	    const Allocator& a = A()) :
+	    v(first, last, a) {}
+    Vector(const Vector<T, A>& x) : v(x.v) {}
+    ~Vector() {}
+    Vector<T, A>& operator=(const Vector<T, A>& x) { v = x.v; return *this; }
+    template <class InputIterator> void
+      assign(InputIterator first, InputIterator last) {
+	v.assign(first, last); }
+    void assign(Size n, const T& u) { v.assign(n, u); }
+    Allocator getAllocator() const { return v.get_allocator(); }
+
+    // iterators
+    Iterator			begin() { return v.begin(); }
+    ConstIterator		begin() const { return v.begin(); }
+    Iterator			end() { return v.end(); }
+    ConstIterator		end() const { return v.end(); }
+    ReverseIterator		reverseBegin() { return v.rbegin(); }
+    ConstReverseIterator	reverseBegin() const { return v.rbegin(); }
+    ReverseIterator		reverseEnd() { return v.rend(); }
+    ConstReverseIterator	reverseEnd() const { return v.rend(); }
+
+    // capacity:
+    Size			size() const { return v.size(); }
+    Size			maxSize() const { return v.max_size(); }
+    void			resize(Size sz, T c = T()) { v.resize(sz, c); }
+    Size			capacity() const { return v.capacity(); }
+    bool			empty() const { return v.empty(); }
+    void			reserve(Size sz) { v.reserve(sz); }
+
+    // element access:
+    Reference			operator[](Size n) { return v[n]; }
+    ConstReference		operator[](Size n) const { return v[n]; }
+    ConstReference		at(Size n) const { return v.at[n]; }
+    Reference			at(Size n) { return v.at[n]; }
+    Reference			front() { return v.front(); }
+    ConstReference		front() const { return v.front(); }
+    Reference			back() { return v.back(); }
+    ConstReference		back() const { return v.back(); }
+
+    // modifiers:
+    void			pushBack(const T& x) { v.push_back(x); }
+    void			popBack() { v.pop_back(); }
+    Iterator			insert(Iterator pos, const T& x) {
+				  return v.insert(pos, x);
+				}
+    void			insert(Iterator pos, Size n, const T& x) {
+				  return v.insert(pos, n, x);
+				}
+    template <class InputIterator> void
+				insert(Iterator pos, InputIterator first, InputIterator last) {
+				  v.insert(pos, first, last);
+				}
+    Iterator			erase(Iterator position) { v.erase(position); }
+    Iterator			erase(ConstIterator first, ConstIterator last) {
+				  v.erase(first, last);
+				}
+    void			swap(Vector<T, A> &x) { v.swap(x.v); }
+    void			clear() { v.clear(); }
+    // TODO all &&
+  };
+
+  template <class T, class Allocator>
+  bool operator== (const Vector<T,Allocator>& x,
+    const Vector<T,Allocator>& y) {
+      return x.v == y.v;
+  }
+
+  template <class T, class Allocator>
+  bool operator< (const Vector<T,Allocator>& x,
+    const Vector<T,Allocator>& y) {
+      return x.v < y.v;
+  }
+
+  template <class T, class Allocator>
+  bool operator!= (const Vector<T,Allocator>& x,
+    const Vector<T,Allocator>& y) {
+      return x.v != y.v;
+  }
+
+  template <class T, class Allocator>
+  bool operator> (const Vector<T,Allocator>& x,
+    const Vector<T,Allocator>& y) {
+      return x.v > y.v;
+  }
+
+  template <class T, class Allocator>
+  bool operator>= (const Vector<T,Allocator>& x,
+    const Vector<T,Allocator>& y) {
+      return x.v >= y.v;
+  }
+
+  template <class T, class Allocator>
+  bool operator<= (const Vector<T,Allocator>& x,
+    const Vector<T,Allocator>& y) {
+      return x.v <= y.v;
+  }
+
+  // specialized algorithms:
+  template <class T, class Allocator>
+  void swap(Vector<T,Allocator>& x, Vector<T,Allocator>& y) {
+    swap(x.v, y.v);
+  }
+}
+
+#endif
